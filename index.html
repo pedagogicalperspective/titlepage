@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PedPer — Title Page Submission Form</title>
+<script src="docx.iife.js"></script>
+<style>
+:root{
+  --dark:#3b2a7a;--med:#5c4db1;--light:#ede9f8;--line:#d8d1f2;
+  --gold:#f0a500;--text:#1a1a2e;--muted:#888;--white:#fff;
+  --ok:#1a7a3b;--ok-bg:#edf7f0;--err:#c0392b;--err-bg:#fdecea;
+  --warn:#fff8e7;--warn-bd:#e8a000;--warn-tx:#7a4a00;
+  --note:#7b5ea7;--note-bg:#f3f0fb;
+  --inp:#c5bbee;--inp-focus:#5c4db1;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Aptos','Aptos Display','Segoe UI',Arial,sans-serif;font-size:11pt;color:var(--text);background:#eae6f4;min-height:100vh;padding:0 0 60px;}
+
+.site-header{background:var(--dark);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.site-header-brand strong{font-size:14pt;display:block;color:#fff;line-height:1.2;}
+.site-header-brand span{font-size:9pt;color:#c9c0f0;font-style:italic;}
+.site-header-right{font-size:9pt;color:#c9c0f0;font-style:italic;text-align:right;}
+.gold-bar{height:4px;background:var(--gold);}
+
+.container{max-width:760px;margin:32px auto 0;padding:0 16px;}
+.intro-card{background:var(--white);border-radius:8px;border-left:5px solid var(--gold);padding:18px 22px;margin-bottom:24px;box-shadow:0 2px 12px rgba(59,42,122,.08);}
+.intro-card h1{font-size:15pt;color:var(--dark);margin-bottom:6px;}
+.intro-card p{font-size:10pt;color:#555;line-height:1.6;}
+
+.steps{display:flex;gap:0;margin-bottom:28px;}
+.step{flex:1;padding:9px 10px;background:var(--light);border:1px solid var(--line);font-size:8.5pt;font-weight:600;color:var(--muted);display:flex;align-items:center;gap:7px;border-right:none;}
+.step:first-child{border-radius:8px 0 0 8px;}
+.step:last-child{border-radius:0 8px 8px 0;border-right:1px solid var(--line);}
+.step.active{background:var(--dark);color:#fff;border-color:var(--dark);}
+.step.done{background:var(--ok-bg);color:var(--ok);border-color:#a8d8b8;}
+.step-num{width:20px;height:20px;border-radius:50%;background:currentColor;color:#fff;display:flex;align-items:center;justify-content:center;font-size:8.5pt;flex-shrink:0;}
+.step.active .step-num{background:var(--gold);color:var(--dark);}
+.step.done .step-num{background:var(--ok);}
+
+.form-card{background:var(--white);border-radius:8px;box-shadow:0 2px 16px rgba(59,42,122,.09);overflow:hidden;margin-bottom:20px;}
+.form-section-head{background:var(--dark);padding:11px 18px;display:flex;align-items:center;justify-content:space-between;}
+.form-section-head span{font-size:11pt;font-weight:700;color:#fff;}
+.form-section-head small{font-size:9pt;color:#c9c0f0;font-style:italic;}
+.form-section-body{padding:20px 22px;}
+
+.field{margin-bottom:16px;}.field:last-child{margin-bottom:0;}
+label{display:block;font-size:9.5pt;font-weight:700;color:var(--dark);margin-bottom:5px;}
+label .req{color:var(--err);margin-left:2px;}
+label .hint{font-weight:400;color:var(--muted);font-size:8.5pt;margin-left:6px;}
+input[type=text],input[type=email],select,textarea{width:100%;padding:8px 11px;border:1.5px solid var(--inp);border-radius:6px;font-family:inherit;font-size:10.5pt;color:var(--text);background:#faf9fe;transition:border-color .2s,box-shadow .2s;outline:none;}
+input:focus,select:focus,textarea:focus{border-color:var(--inp-focus);box-shadow:0 0 0 3px rgba(92,77,177,.12);}
+input.error,select.error,textarea.error{border-color:var(--err);}
+textarea{resize:vertical;line-height:1.65;}
+select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235c4db1' stroke-width='2' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px;}
+.err-msg{font-size:8.5pt;color:var(--err);margin-top:4px;display:none;}.err-msg.show{display:block;}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+@media(max-width:520px){.grid2,.grid3{grid-template-columns:1fr;}}
+
+.note-banner{background:var(--note-bg);border-left:4px solid var(--note);border-radius:0 6px 6px 0;padding:8px 12px;font-size:9pt;color:var(--note);font-style:italic;line-height:1.5;margin-bottom:16px;}
+.note-banner::before{content:"⚑  ";font-style:normal;font-weight:700;}
+.warn-banner{background:var(--warn);border-left:4px solid var(--warn-bd);border-radius:0 6px 6px 0;padding:10px 14px;font-size:9pt;color:var(--warn-tx);line-height:1.6;margin-bottom:16px;}
+
+/* CRediT checkboxes */
+.credit-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;margin-top:4px;}
+@media(max-width:520px){.credit-grid{grid-template-columns:1fr;}}
+.credit-item{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:5px;cursor:pointer;transition:background .12s;}
+.credit-item:hover{background:var(--light);}
+.credit-item input[type=checkbox]{width:15px;height:15px;accent-color:var(--ok);flex-shrink:0;cursor:pointer;}
+.credit-item label{font-size:9.5pt;color:var(--text);cursor:pointer;font-weight:400;}
+
+/* Author cards */
+.author-card{border:1.5px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:12px;}
+.author-head{background:var(--dark);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:10px 16px;}
+.author-head.alt{background:var(--med);}
+.author-head-title{font-weight:700;font-size:10.5pt;}
+.author-head-sub{font-size:8.5pt;color:#c9c0f0;}
+.author-body{padding:16px 18px;background:#fff;}
+.author-card.collapsed .author-body{display:none;}
+.author-card.collapsed .author-head{background:var(--light);}
+.author-card.collapsed .author-head-title{color:var(--dark);}
+.author-card.collapsed .author-head-sub{color:var(--muted);}
+.btn-sm{background:var(--light);border:1px solid var(--line);color:var(--med);border-radius:5px;padding:4px 10px;font-size:8.5pt;font-weight:700;cursor:pointer;white-space:nowrap;}
+.btn-sm:hover{background:#ddd8f8;}
+.btn-sm-danger{background:#fdecea;border-color:#e8a9a4;color:var(--err);}
+.btn-sm-danger:hover{background:#fbd5d1;}
+
+.add-author-btn{display:flex;align-items:center;gap:7px;background:none;border:2px dashed var(--med);color:var(--med);border-radius:8px;padding:10px 18px;font-size:10pt;font-weight:700;cursor:pointer;width:100%;justify-content:center;margin-bottom:12px;transition:all .15s;}
+.add-author-btn:hover{background:var(--light);border-color:var(--dark);color:var(--dark);}
+
+/* Radio items (AI disclosure) */
+.radio-list{border:1.5px solid var(--line);border-radius:8px;overflow:hidden;}
+.radio-item{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);cursor:pointer;transition:background .12s;}
+.radio-item:last-child{border-bottom:none;}
+.radio-item:hover{background:var(--light);}
+.radio-item.selected{background:var(--ok-bg);}
+.radio-item input[type=radio]{width:16px;height:16px;flex-shrink:0;margin-top:2px;accent-color:var(--ok);cursor:pointer;}
+.radio-item-text{flex:1;font-size:10pt;}
+.radio-item.selected .radio-item-text{color:var(--ok);font-weight:600;}
+
+/* Declarations table */
+.decl-table{width:100%;border-collapse:collapse;}
+.decl-table thead th{background:var(--dark);color:#fff;text-align:left;font-size:9pt;font-weight:700;padding:9px 12px;}
+.decl-table tbody tr:nth-child(even){background:#faf9fe;}.decl-table tbody tr:nth-child(odd){background:#fff;}
+.decl-table td{padding:8px 10px;vertical-align:top;border-bottom:1px solid var(--line);}
+.decl-table td:first-child{font-size:9pt;font-weight:700;color:var(--dark);width:140px;white-space:nowrap;}
+.decl-table td textarea{width:100%;border:1px solid var(--inp);border-radius:5px;background:transparent;padding:6px 9px;resize:vertical;min-height:46px;font-size:9.5pt;font-family:inherit;color:var(--text);outline:none;}
+.decl-table td textarea:focus{border-color:var(--inp-focus);box-shadow:0 0 0 2px rgba(92,77,177,.1);}
+
+/* Action bar */
+.action-bar{display:flex;align-items:center;justify-content:flex-end;gap:12px;padding:16px 22px;border-top:1px solid var(--line);background:#faf9fe;flex-wrap:wrap;}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 22px;border-radius:7px;font-family:inherit;font-size:11pt;font-weight:700;cursor:pointer;border:none;transition:background .2s,transform .1s;}
+.btn:active{transform:scale(.98);}
+.btn-primary{background:var(--dark);color:#fff;}.btn-primary:hover{background:var(--med);}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.form-err-banner{background:var(--err-bg);border:1px solid #f5b7b1;border-radius:6px;padding:10px 14px;font-size:9.5pt;color:var(--err);display:none;flex:1;}
+.form-err-banner.show{display:block;}
+.spinner{width:18px;height:18px;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.progress-wrap{height:4px;background:var(--line);border-radius:2px;margin-top:12px;display:none;}
+.progress-bar{height:4px;background:var(--gold);border-radius:2px;width:0;transition:width .3s;}
+
+#success-screen{display:none;text-align:center;background:var(--white);border-radius:8px;box-shadow:0 2px 16px rgba(59,42,122,.09);padding:48px 32px;}
+#success-screen .tick{font-size:52px;margin-bottom:16px;}
+#success-screen h2{font-size:16pt;color:var(--ok);margin-bottom:10px;}
+#success-screen p{font-size:10.5pt;color:#555;line-height:1.7;max-width:480px;margin:0 auto 16px;}
+.btn-reset{background:var(--dark);color:#fff;border:none;padding:11px 28px;border-radius:7px;font-family:inherit;font-size:11pt;font-weight:700;cursor:pointer;margin-top:8px;}
+.site-footer{text-align:center;font-size:9pt;color:var(--muted);font-style:italic;margin-top:40px;padding:0 16px;}
+</style>
+</head>
+<body>
+
+<div class="site-header">
+  <div class="site-header-brand">
+    <strong>Pedagogical Perspective</strong>
+    <span>PedPer  •  ISSN: 2822-4841  •  Open Access  •  Double-Blind Review</span>
+  </div>
+  <div class="site-header-right">Title Page Submission Form<br>pedagogicalperspective.com</div>
+</div>
+<div class="gold-bar"></div>
+
+<div class="container">
+
+  <div class="intro-card">
+    <h1>Title Page Submission Form</h1>
+    <p>Complete the fields below to generate and submit your Title Page. This page contains full author information and declarations — it is <strong>NOT shared with reviewers</strong>. The completed Word file will be downloaded automatically and a copy sent to your email and the editorial office.</p>
+  </div>
+
+  <div class="steps">
+    <div class="step active" id="step1"><div class="step-num">1</div> Manuscript</div>
+    <div class="step" id="step2"><div class="step-num">2</div> Authors</div>
+    <div class="step" id="step3"><div class="step-num">3</div> Ethics</div>
+    <div class="step" id="step4"><div class="step-num">4</div> Declarations</div>
+    <div class="step" id="step5"><div class="step-num">5</div> AI &amp; Submit</div>
+  </div>
+
+  <form id="tp-form" novalidate>
+
+    <!-- 01 MANUSCRIPT -->
+    <div class="form-card">
+      <div class="form-section-head"><span>01 — Manuscript Details</span><small>Submission information</small></div>
+      <div class="form-section-body">
+        <div class="field">
+          <label for="ms-title">Full Manuscript Title <span class="req">*</span></label>
+          <textarea id="ms-title" rows="2" required placeholder="Enter the full title in sentence case"></textarea>
+          <div class="err-msg" id="err-ms-title">Please enter the manuscript title.</div>
+        </div>
+        <div class="field">
+          <label for="ms-running">Running Head <span class="req">*</span> <span class="hint">Abbreviated title, max. 50 characters</span></label>
+          <input type="text" id="ms-running" maxlength="50" required placeholder="e.g. Teacher Professional Development and Digital Tools">
+          <div class="err-msg" id="err-ms-running">Please enter the running head.</div>
+        </div>
+        <div class="grid2">
+          <div class="field">
+            <label for="ms-type">Article Type <span class="req">*</span></label>
+            <select id="ms-type" required>
+              <option value="">— Select —</option>
+              <option>Original Research Article</option>
+              <option>Systematic Review / Meta-Analysis</option>
+              <option>Review Article</option>
+              <option>Theoretical / Conceptual Article</option>
+              <option>Methodological Study</option>
+              <option>Action Research / Case Study</option>
+            </select>
+            <div class="err-msg" id="err-ms-type">Please select an article type.</div>
+          </div>
+          <div class="field">
+            <label for="ms-words">Word Count <span class="req">*</span> <span class="hint">Main body only</span></label>
+            <input type="text" id="ms-words" required placeholder="e.g. 7,450">
+            <div class="err-msg" id="err-ms-words">Please enter the word count.</div>
+          </div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label for="ms-tables">Tables</label><input type="text" id="ms-tables" placeholder="e.g. 3"></div>
+          <div class="field"><label for="ms-figures">Figures</label><input type="text" id="ms-figures" placeholder="e.g. 2"></div>
+        </div>
+        <div class="field">
+          <label for="ms-keywords">Keywords <span class="req">*</span> <span class="hint">3–7 terms; semicolons; not already in the title</span></label>
+          <input type="text" id="ms-keywords" required placeholder="e.g. teacher education; professional development; mixed methods">
+          <div class="err-msg" id="err-ms-keywords">Please enter at least 3 keywords.</div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label for="sub-date">Date of Submission <span class="req">*</span></label><input type="text" id="sub-date" required placeholder="DD/MM/YYYY"><div class="err-msg" id="err-sub-date">Please enter the submission date.</div></div>
+          <div class="field"><label for="ms-version">Manuscript Version</label>
+            <select id="ms-version"><option>Original Submission</option><option>Revised (1st)</option><option>Revised (2nd)</option><option>Final Accepted</option></select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 02 AUTHORS -->
+    <div class="form-card">
+      <div class="form-section-head"><span>02 — Author Information</span><small>Publication order; Author 1 = Corresponding</small></div>
+      <div class="form-section-body">
+        <div class="note-banner">All authors must provide an ORCID iD and declare CRediT contribution roles. Author 1 is the Corresponding Author.</div>
+        <div id="authors-container"></div>
+        <button type="button" class="add-author-btn" id="btn-add-author">＋ Add Co-Author</button>
+        <p id="author-max-msg" style="display:none;font-size:9pt;color:var(--muted);text-align:center;">Maximum of 5 authors reached.</p>
+      </div>
+    </div>
+
+    <!-- 03 ETHICS -->
+    <div class="form-card">
+      <div class="form-section-head"><span>03 — Ethics Committee Approval</span><small>If applicable</small></div>
+      <div class="form-section-body">
+        <div class="warn-banner">Required for all studies involving human participants. In the Blind Manuscript, refer only to "XXX Ethics Committee" to preserve anonymity.</div>
+        <div class="grid2">
+          <div class="field"><label for="eth-name">Committee Name</label><input type="text" id="eth-name" placeholder="e.g. Ordu University Ethics Committee"></div>
+          <div class="field"><label for="eth-date">Approval Date</label><input type="text" id="eth-date" placeholder="DD/MM/YYYY"></div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label for="eth-number">Decision Number</label><input type="text" id="eth-number" placeholder="e.g. 2024/12-B"></div>
+          <div class="field"><label for="eth-consent">Informed Consent</label>
+            <select id="eth-consent"><option value="">— Select —</option><option>Yes — written consent obtained</option><option>Yes — verbal consent obtained</option><option>Not applicable (secondary data)</option><option>Not applicable (exempt study)</option></select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 04 DECLARATIONS -->
+    <div class="form-card">
+      <div class="form-section-head"><span>04 — Declarations</span><small>All mandatory</small></div>
+      <div class="form-section-body">
+        <div class="note-banner">All declarations are mandatory. Use the provided placeholder text if not applicable.</div>
+        <div style="overflow-x:auto">
+          <table class="decl-table"><thead><tr><th>Declaration</th><th>Statement <span style="font-weight:400;font-style:italic">(edit as needed)</span></th></tr></thead>
+          <tbody>
+            <tr><td>Conflict of Interest</td><td><textarea id="decl-coi" placeholder="The authors declare that they have no conflict of interest to disclose."></textarea></td></tr>
+            <tr><td>Funding</td><td><textarea id="decl-funding" placeholder="This research received no specific grant from any funding agency in the public, commercial, or not-for-profit sectors."></textarea></td></tr>
+            <tr><td>Data Availability</td><td><textarea id="decl-data" placeholder="The data that support the findings of this study are available upon request from the corresponding author."></textarea></td></tr>
+            <tr><td>Author Contributions</td><td><textarea id="decl-contrib" placeholder="Author 1: Conceptualization, Methodology, Writing – Original Draft. Author 2: Formal Analysis, Writing – Review & Editing."></textarea></td></tr>
+            <tr><td>Acknowledgements</td><td><textarea id="decl-ack" placeholder="Not applicable. / The authors would like to thank..."></textarea></td></tr>
+            <tr><td>Prior Publication</td><td><textarea id="decl-prior" placeholder="This manuscript has not been previously published and is not under consideration for publication elsewhere."></textarea></td></tr>
+          </tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 05 AI DISCLOSURE -->
+    <div class="form-card">
+      <div class="form-section-head"><span>05 — Generative AI Disclosure</span><small>COPE AI Policy — required</small></div>
+      <div class="form-section-body">
+        <div class="field">
+          <label>AI Disclosure <span class="req">*</span></label>
+          <div class="radio-list" id="ai-list">
+            <label class="radio-item" onclick="selectAI(this)">
+              <input type="radio" name="ai-disclosure" value="No AI used">
+              <div class="radio-item-text">No generative AI tools were used in the preparation of this manuscript.</div>
+            </label>
+            <label class="radio-item" onclick="selectAI(this)">
+              <input type="radio" name="ai-disclosure" value="AI used — see details">
+              <div class="radio-item-text">Generative AI tool(s) were used (provide details below).</div>
+            </label>
+          </div>
+          <div class="err-msg" id="err-ai-disclosure">Please select one option.</div>
+        </div>
+        <div class="field" id="ai-detail-wrap" style="display:none">
+          <label for="ai-details">AI Tool Details <span class="req">*</span> <span class="hint">Tool name & version · Manufacturer · Date(s) · Purpose · Sections affected</span></label>
+          <textarea id="ai-details" rows="2" placeholder="e.g. ChatGPT GPT-4o (OpenAI, April 2025) — language editing of the Discussion section."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- 06 SUBMIT -->
+    <div class="form-card">
+      <div class="action-bar">
+        <div id="form-err-banner" class="form-err-banner">Please fill in all required fields before submitting.</div>
+        <button type="submit" class="btn btn-primary" id="submit-btn">
+          <span id="submit-label">⬇ Download Title Page &amp; Send Email</span>
+          <div class="spinner" id="submit-spinner"></div>
+        </button>
+      </div>
+      <div style="padding:0 22px 16px;">
+        <div class="progress-wrap" id="progress-wrap"><div class="progress-bar" id="progress-bar"></div></div>
+      </div>
+    </div>
+
+  </form>
+
+  <!-- Success -->
+  <div id="success-screen">
+    <div class="tick">✅</div>
+    <h2>Title Page Submitted!</h2>
+    <p>Your Title Page has been downloaded as a Word document. A confirmation e-mail has been sent to <strong id="success-email"></strong> and the editorial office.</p>
+    <p style="font-size:9.5pt;">Please upload the downloaded .docx file to <a href="https://pedagogicalperspective.com/index.php/pub/submissions" target="_blank" style="color:var(--med)">OJS</a> together with your manuscript files.</p>
+    <button class="btn-reset" onclick="resetForm()">← Start Over</button>
+  </div>
+
+  <div class="site-footer">Pedagogical Perspective (PedPer)  •  editor@pedagogicalperspective.com  •  Ordu University, Türkiye</div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// Config
+// ═══════════════════════════════════════════════════════════════
+const MAX_AUTHORS=5;
+const CREDIT_ROLES=["Conceptualization","Methodology","Software","Validation","Formal Analysis","Investigation","Resources","Data Curation","Writing – Original Draft","Writing – Review & Editing","Visualization","Supervision","Project Administration","Funding Acquisition"];
+const TITLES=["— Select —","Prof. Dr.","Assoc. Prof. Dr.","Asst. Prof. Dr.","Dr.","PhD Candidate","Research Assistant","Other"];
+
+// ═══════════════════════════════════════════════════════════════
+// AI selection
+// ═══════════════════════════════════════════════════════════════
+function selectAI(el){
+  document.querySelectorAll('.radio-item').forEach(r=>r.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('err-ai-disclosure').classList.remove('show');
+  const val=el.querySelector('input').value;
+  document.getElementById('ai-detail-wrap').style.display=val.startsWith('AI used')?'block':'none';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Author cards
+// ═══════════════════════════════════════════════════════════════
+let authorCount=0;
+const aCtn=document.getElementById('authors-container');
+
+function buildAuthorCard(n){
+  const f=n===1,p='a'+n;
+  const c=document.createElement('div');
+  c.className='author-card'+(f?'':' collapsed');c.id='ac-'+n;c.dataset.n=n;
+  const tO=TITLES.map(t=>'<option value="'+(t==="— Select —"?"":t)+'">'+t+'</option>').join('');
+  const cI=CREDIT_ROLES.map((r,i)=>'<div class="credit-item"><input type="checkbox" id="'+p+'c'+i+'" data-role="'+r+'"><label for="'+p+'c'+i+'">'+r+'</label></div>').join('');
+  const hB=n%2===0?' alt':'';
+  const hL=f?'Author 1 — Corresponding Author':'Author '+n+' — Co-Author';
+  const hS=f?'required':'not yet filled';
+  const ctrl=f?'<button type="button" class="btn-sm" onclick="toggleA('+n+')">▾ Collapse</button>':'<div style="display:flex;gap:4px"><button type="button" class="btn-sm" onclick="toggleA('+n+')">▸ Expand</button><button type="button" class="btn-sm btn-sm-danger" onclick="removeA('+n+')">✕</button></div>';
+  const R=f?' required':'',S=f?' <span class="req">*</span>':'';
+  c.innerHTML='<div class="author-head'+hB+'"><div><div class="author-head-title">'+hL+'</div><div class="author-head-sub">'+hS+'</div></div><div>'+ctrl+'</div></div>'+'<div class="author-body"><div class="grid2"><div class="field"><label>Full Name'+S+'</label><input type="text" data-f="name"'+R+' placeholder="e.g. Ahmet Yılmaz"><div class="err-msg">Required.</div></div><div class="field"><label>Academic Title</label><select data-f="title">'+tO+'</select></div></div><div class="field"><label>Department & Faculty'+S+'</label><input type="text" data-f="dept"'+R+' placeholder="e.g. Department of Mathematics Education, Faculty of Education"><div class="err-msg">Required.</div></div><div class="field"><label>University / Institution & Country'+S+'</label><input type="text" data-f="univ"'+R+' placeholder="e.g. Ordu University, Ordu, Türkiye"><div class="err-msg">Required.</div></div><div class="grid2"><div class="field"><label>E-mail Address'+S+'</label><input type="email" data-f="email"'+R+' placeholder="author@university.edu"><div class="err-msg">Valid e-mail required.</div></div><div class="field"><label>ORCID iD'+S+'</label><input type="text" data-f="orcid"'+R+' placeholder="0000-0000-0000-0000"><div class="err-msg">Required.</div></div></div><div class="field"><label>CRediT Roles'+S+' <span class="hint">check all that apply</span></label><div class="credit-grid">'+cI+'</div><div class="err-msg" id="err-credit-'+n+'">Select at least one role.</div></div></div>';
+  return c;
+}
+
+window.addAuthor=function(){if(authorCount>=MAX_AUTHORS)return;authorCount++;const c=buildAuthorCard(authorCount);aCtn.appendChild(c);if(authorCount>1)setTimeout(()=>{c.classList.remove('collapsed');updTgl(c,false);},50);updAddBtn();};
+window.removeA=function(n){const c=document.getElementById('ac-'+n);if(!c||c.dataset.n==1)return;c.remove();authorCount--;renumA();updAddBtn();};
+window.toggleA=function(n){const c=document.getElementById('ac-'+n);if(c)updTgl(c,c.classList.toggle('collapsed'));};
+function updTgl(c,col){const b=c.querySelector('.btn-sm');if(b)b.innerHTML=col?'▸ Expand':'▾ Collapse';}
+function updAddBtn(){document.getElementById('btn-add-author').style.display=authorCount>=MAX_AUTHORS?'none':'flex';document.getElementById('author-max-msg').style.display=authorCount>=MAX_AUTHORS?'block':'none';}
+function renumA(){const cs=aCtn.querySelectorAll('.author-card');authorCount=cs.length;cs.forEach((c,i)=>{const n=i+1;c.id='ac-'+n;c.dataset.n=n;c.querySelector('.author-head-title').textContent=n===1?'Author 1 — Corresponding Author':'Author '+n+' — Co-Author';const tg=c.querySelector('.btn-sm');if(tg)tg.setAttribute('onclick','toggleA('+n+')');const rm=c.querySelector('.btn-sm-danger');if(rm)rm.setAttribute('onclick','removeA('+n+')');});}
+
+// ═══════════════════════════════════════════════════════════════
+// Auto date
+// ═══════════════════════════════════════════════════════════════
+(function(){const d=new Date();document.getElementById('sub-date').value=String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();})();
+
+// ═══════════════════════════════════════════════════════════════
+// Validation
+// ═══════════════════════════════════════════════════════════════
+function setErr(el){el.classList.add('error');const m=el.parentElement.querySelector('.err-msg');if(m)m.classList.add('show');}
+function clrErr(el){el.classList.remove('error');const m=el.parentElement.querySelector('.err-msg');if(m)m.classList.remove('show');}
+
+function validate(){
+  let ok=true;
+  // Manuscript fields
+  ['ms-title','ms-running','ms-type','ms-words','ms-keywords','sub-date'].forEach(id=>{
+    const el=document.getElementById(id);if(!el.value.trim()){setErr(el);ok=false;}else clrErr(el);
+  });
+  // Author 1 required fields
+  const a1=document.getElementById('ac-1');
+  if(a1){a1.querySelectorAll('[required]').forEach(el=>{if(!el.value.trim()){setErr(el);ok=false;}else clrErr(el);});
+    // Email format
+    const em=a1.querySelector('[data-f="email"]');if(em&&em.value.trim()&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em.value)){setErr(em);ok=false;}
+    // CRediT
+    if(!a1.querySelectorAll('input[type=checkbox]:checked').length){document.getElementById('err-credit-1').classList.add('show');ok=false;}else document.getElementById('err-credit-1').classList.remove('show');
+  }
+  // AI
+  if(!document.querySelector('input[name="ai-disclosure"]:checked')){document.getElementById('err-ai-disclosure').classList.add('show');ok=false;}
+  return ok;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Collect data
+// ═══════════════════════════════════════════════════════════════
+const g=id=>(document.getElementById(id)?.value.trim()||'');
+
+function collectAuthors(){
+  const arr=[];
+  aCtn.querySelectorAll('.author-card').forEach((c,i)=>{
+    const n=i+1,gf=f=>c.querySelector('[data-f="'+f+'"]')?.value.trim()||'';
+    const credits=[...c.querySelectorAll('input[type=checkbox]:checked')].map(cb=>cb.dataset.role);
+    arr.push({n,name:gf('name'),title:gf('title'),dept:gf('dept'),univ:gf('univ'),email:gf('email'),orcid:gf('orcid'),credits});
+  });
+  return arr;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Progress
+// ═══════════════════════════════════════════════════════════════
+function setProgress(p){document.getElementById('progress-wrap').style.display='block';document.getElementById('progress-bar').style.width=p+'%';}
+
+// ═══════════════════════════════════════════════════════════════
+// DOCX Generation (same pattern as Withdrawal form)
+// ═══════════════════════════════════════════════════════════════
+async function buildDocx(data,authors){
+  const{Document,Packer,Paragraph,TextRun,Table,TableRow,TableCell,AlignmentType,BorderStyle,WidthType,ShadingType,VerticalAlign}=docx;
+  const DARK='3B2A7A',MED='5C4DB1',GOLD='F0A500',WHITE='FFFFFF',LIGHT='EDE9F8',LINE='D8D1F2',MUTED='888888',METABD='7C6FC4';
+  const A4W=11906,A4H=16838,MAR=1134,CW=A4W-MAR*2;
+  const F=(t,o={})=>new TextRun({text:t,font:'Aptos',size:22,...o});
+  const FB=(t,o={})=>F(t,{bold:true,...o});
+  const FI=(t,o={})=>F(t,{italics:true,...o});
+  const noBd=()=>({style:BorderStyle.NONE,size:0,color:WHITE});
+  const sBd=(c,sz=4)=>({style:BorderStyle.SINGLE,size:sz,color:c});
+  const cm=(t,l,b,r)=>({top:t,left:l,bottom:b,right:r});
+  const sp=(n=120)=>new Paragraph({children:[F(' ')],spacing:{before:n,after:0,line:240,lineRule:'auto'}});
+
+  function secBar(title,hint=''){
+    const W1=Math.round(CW*.62),W2=CW-W1;
+    return new Table({width:{size:CW,type:WidthType.DXA},columnWidths:[W1,W2],rows:[new TableRow({children:[
+      new TableCell({width:{size:W1,type:WidthType.DXA},shading:{fill:DARK,type:ShadingType.CLEAR},margins:cm(120,220,120,220),verticalAlign:VerticalAlign.CENTER,borders:{top:noBd(),bottom:noBd(),left:noBd(),right:noBd()},children:[new Paragraph({children:[FB(title,{color:WHITE,size:24})],spacing:{line:276,lineRule:'auto'}})]}),
+      new TableCell({width:{size:W2,type:WidthType.DXA},shading:{fill:DARK,type:ShadingType.CLEAR},margins:cm(120,220,120,220),verticalAlign:VerticalAlign.CENTER,borders:{top:noBd(),bottom:noBd(),left:noBd(),right:noBd()},children:[new Paragraph({children:[FI(hint,{color:'C9C0F0',size:18})],alignment:AlignmentType.RIGHT,spacing:{line:276,lineRule:'auto'}})]})
+    ]})]});
+  }
+
+  function metaRow(pairs,cols=2){
+    const colW=Math.floor(CW/cols);
+    const rows=[];
+    for(let i=0;i<pairs.length;i+=cols){
+      const slice=pairs.slice(i,i+cols);
+      rows.push(new TableRow({children:slice.map(([label,val],ci)=>new TableCell({width:{size:colW,type:WidthType.DXA},shading:{fill:ci%2===0?LIGHT:WHITE,type:ShadingType.CLEAR},margins:cm(80,160,80,160),borders:{top:sBd(METABD),left:sBd(METABD),bottom:sBd(LINE),right:sBd(METABD)},children:[
+        new Paragraph({children:[FB(label,{color:DARK,size:18})],spacing:{after:40,line:276,lineRule:'auto'}}),
+        new Paragraph({children:[FI(val||'—',{color:'444444',size:20})],spacing:{line:276,lineRule:'auto'}})
+      ]}))}));
+    }
+    return new Table({width:{size:CW,type:WidthType.DXA},columnWidths:Array(cols).fill(colW),rows});
+  }
+
+  function wrapCell(children,bg=WHITE){
+    return new Table({width:{size:CW,type:WidthType.DXA},columnWidths:[CW],rows:[new TableRow({children:[new TableCell({width:{size:CW,type:WidthType.DXA},shading:{fill:bg,type:ShadingType.CLEAR},margins:cm(140,220,140,220),borders:{top:sBd(METABD),left:{style:BorderStyle.SINGLE,size:12,color:MED},bottom:sBd(MED,6),right:noBd()},children})]})]});
+  }
+
+  // Author table for each author
+  function authorSection(a){
+    const items=[['Full Name',a.name],['Academic Title',a.title||'—'],['Department & Faculty',a.dept],['University / Institution & Country',a.univ],['E-mail',a.email],['ORCID iD',a.orcid],['CRediT Roles',a.credits.join('; ')||'—']];
+    const colW=Math.floor(CW/2);
+    const hdr=new TableRow({children:[new TableCell({gridSpan:2,width:{size:CW,type:WidthType.DXA},shading:{fill:a.n===1?DARK:MED,type:ShadingType.CLEAR},margins:cm(90,200,90,200),borders:{top:noBd(),bottom:noBd(),left:noBd(),right:noBd()},children:[new Paragraph({children:[FB('Author '+a.n+(a.n===1?' — Corresponding Author':' — Co-Author'),{color:WHITE,size:22})],spacing:{line:276,lineRule:'auto'}})]})]});
+    const dataRows=items.map(([l,v],ri)=>new TableRow({children:[
+      new TableCell({width:{size:colW,type:WidthType.DXA},shading:{fill:ri%2===0?LIGHT:WHITE,type:ShadingType.CLEAR},margins:cm(70,160,70,160),borders:{top:sBd(LINE),bottom:sBd(LINE),left:sBd(METABD),right:sBd(METABD)},children:[new Paragraph({children:[FB(l,{color:DARK,size:18})],spacing:{line:276,lineRule:'auto'}})]}),
+      new TableCell({width:{size:colW,type:WidthType.DXA},shading:{fill:ri%2===0?WHITE:'FAFAFE',type:ShadingType.CLEAR},margins:cm(70,160,70,160),borders:{top:sBd(LINE),bottom:sBd(LINE),left:sBd(METABD),right:sBd(METABD)},children:[new Paragraph({children:[F(v,{size:20})],spacing:{line:276,lineRule:'auto'}})]})
+    ]}));
+    return new Table({width:{size:CW,type:WidthType.DXA},columnWidths:[colW,colW],rows:[hdr,...dataRows]});
+  }
+
+  // Declarations table
+  function declTable(){
+    const decls=[['Conflict of Interest',data.declCoi],['Funding',data.declFunding],['Data Availability',data.declData],['Author Contributions',data.declContrib],['Acknowledgements',data.declAck],['Prior Publication',data.declPrior]];
+    const W1=2400,W2=CW-W1;
+    const hdr=new TableRow({children:[
+      new TableCell({width:{size:W1,type:WidthType.DXA},shading:{fill:DARK,type:ShadingType.CLEAR},margins:cm(80,160,80,160),borders:{top:noBd(),bottom:noBd(),left:noBd(),right:noBd()},children:[new Paragraph({children:[FB('Declaration',{color:WHITE,size:20})],spacing:{line:276,lineRule:'auto'}})]}),
+      new TableCell({width:{size:W2,type:WidthType.DXA},shading:{fill:DARK,type:ShadingType.CLEAR},margins:cm(80,160,80,160),borders:{top:noBd(),bottom:noBd(),left:noBd(),right:noBd()},children:[new Paragraph({children:[FB('Statement',{color:WHITE,size:20})],spacing:{line:276,lineRule:'auto'}})]})
+    ]});
+    const dR=decls.map(([l,v],i)=>new TableRow({children:[
+      new TableCell({width:{size:W1,type:WidthType.DXA},shading:{fill:i%2===0?LIGHT:WHITE,type:ShadingType.CLEAR},margins:cm(80,160,80,160),verticalAlign:VerticalAlign.TOP,borders:{top:sBd(LINE),bottom:sBd(LINE),left:sBd(METABD),right:sBd(METABD)},children:[new Paragraph({children:[FB(l,{color:DARK,size:19})],spacing:{line:276,lineRule:'auto'}})]}),
+      new TableCell({width:{size:W2,type:WidthType.DXA},shading:{fill:i%2===0?WHITE:'FAFAFE',type:ShadingType.CLEAR},margins:cm(80,160,80,160),verticalAlign:VerticalAlign.TOP,borders:{top:sBd(LINE),bottom:sBd(LINE),left:sBd(METABD),right:sBd(METABD)},children:[new Paragraph({children:[F(v||'—',{size:20})],alignment:AlignmentType.JUSTIFIED,spacing:{line:400,lineRule:'auto'}})]})
+    ]}));
+    return new Table({width:{size:CW,type:WidthType.DXA},columnWidths:[W1,W2],rows:[hdr,...dR]});
+  }
+
+  // Build author children
+  const authorChildren=[];
+  authors.forEach(a=>{authorChildren.push(authorSection(a),sp(100));});
+
+  const doc=new Document({
+    sections:[{
+      properties:{page:{size:{width:A4W,height:A4H},margin:{top:MAR,right:MAR,bottom:MAR,left:MAR}}},
+      children:[
+        // Cover header
+        new Table({width:{size:CW,type:WidthType.DXA},columnWidths:[Math.round(CW*.6),CW-Math.round(CW*.6)],rows:[
+          new TableRow({children:[
+            new TableCell({width:{size:Math.round(CW*.6),type:WidthType.DXA},shading:{fill:DARK,type:ShadingType.CLEAR},margins:cm(200,260,200,260),verticalAlign:VerticalAlign.CENTER,borders:{top:noBd(),bottom:noBd(),left:noBd(),right:noBd()},children:[
+              new Paragraph({children:[FB('Pedagogical Perspective',{color:WHITE,size:34})],spacing:{after:60,line:276,lineRule:'auto'}}),
+              new Paragraph({children:[FI('PedPer  •  ISSN: 2822-4841  •  pedagogicalperspective.com',{color:'C9C0F0',size:18})],spacing:{line:276,lineRule:'auto'}})
+            ]}),
+            new TableCell({width:{size:CW-Math.round(CW*.6),type:WidthType.DXA},shading:{fill:DARK,type:ShadingType.CLEAR},margins:cm(200,260,200,260),verticalAlign:VerticalAlign.CENTER,borders:{top:noBd(),bottom:noBd(),left:noBd(),right:noBd()},children:[
+              new Paragraph({children:[FB('TITLE PAGE',{color:GOLD,size:24})],alignment:AlignmentType.RIGHT,spacing:{after:40,line:276,lineRule:'auto'}}),
+              new Paragraph({children:[FI('Not Shared with Reviewers',{color:'C9C0F0',size:18})],alignment:AlignmentType.RIGHT,spacing:{line:276,lineRule:'auto'}})
+            ]})
+          ]}),
+          new TableRow({children:[new TableCell({gridSpan:2,shading:{fill:GOLD,type:ShadingType.CLEAR},margins:cm(6,0,6,0),borders:{top:noBd(),bottom:noBd(),left:noBd(),right:noBd()},children:[new Paragraph({children:[F(' ')],spacing:{line:240,lineRule:'auto'}})]})]})
+        ]}),
+        sp(160),
+
+        // 1 Manuscript
+        secBar('1.  MANUSCRIPT DETAILS',''),
+        metaRow([['Full Manuscript Title',data.msTitle],['Running Head',data.msRunning],['Article Type',data.msType],['Word Count',data.msWords],['Tables',data.msTables||'—'],['Figures',data.msFigures||'—'],['Keywords',data.msKeywords],['Date of Submission',data.subDate],['Manuscript Version',data.msVersion]],2),
+        sp(200),
+
+        // 2 Authors
+        secBar('2.  AUTHOR INFORMATION','All authors in publication order'),
+        ...authorChildren,
+        sp(120),
+
+        // 3 Ethics
+        secBar('3.  ETHICS COMMITTEE APPROVAL','If applicable'),
+        metaRow([['Committee Name',data.ethName||'—'],['Approval Date',data.ethDate||'—'],['Decision Number',data.ethNumber||'—'],['Informed Consent',data.ethConsent||'—']],2),
+        sp(200),
+
+        // 4 Declarations
+        secBar('4.  DECLARATIONS',''),
+        declTable(),
+        sp(200),
+
+        // 5 AI
+        secBar('5.  GENERATIVE AI DISCLOSURE','COPE AI Policy'),
+        wrapCell([
+          new Paragraph({children:[FB('AI Disclosure: ',{color:DARK,size:20}),F(data.aiDisclosure,{size:20})],spacing:{after:80,line:276,lineRule:'auto'}}),
+          new Paragraph({children:[FB('AI Tool Details: ',{color:DARK,size:20}),FI(data.aiDetails||'—',{color:'444444',size:20})],spacing:{line:276,lineRule:'auto'}})
+        ]),
+        sp(200),
+
+        // 6 Submission
+        secBar('6.  SUBMISSION DETAILS',''),
+        metaRow([['Date of Submission',data.subDate],['Manuscript Version',data.msVersion]],2),
+        sp(100),
+        new Table({width:{size:CW,type:WidthType.DXA},columnWidths:[CW],rows:[new TableRow({children:[new TableCell({width:{size:CW,type:WidthType.DXA},shading:{fill:'FAFAFE',type:ShadingType.CLEAR},margins:cm(100,160,100,160),borders:{top:sBd(LINE),bottom:sBd(LINE),left:sBd(METABD),right:sBd(METABD)},children:[new Paragraph({children:[FB('Corresponding Author Signature / Initial: ',{color:DARK,size:20}),FI('[Sign here on printed copy]',{color:MUTED,size:20})],spacing:{line:480,lineRule:'auto'}})]})]})]
+        }),
+        sp(200),
+
+        // Footer
+        new Table({width:{size:CW,type:WidthType.DXA},columnWidths:[Math.round(CW*.65),CW-Math.round(CW*.65)],rows:[new TableRow({children:[
+          new TableCell({shading:{fill:DARK,type:ShadingType.CLEAR},margins:cm(90,200,90,200),borders:{top:noBd(),bottom:noBd(),left:noBd(),right:noBd()},children:[new Paragraph({children:[FI('Pedagogical Perspective (PedPer)  •  editor@pedagogicalperspective.com',{color:'C9C0F0',size:18})],spacing:{line:276,lineRule:'auto'}})]}),
+          new TableCell({shading:{fill:DARK,type:ShadingType.CLEAR},margins:cm(90,200,90,200),borders:{top:noBd(),bottom:noBd(),left:noBd(),right:noBd()},children:[new Paragraph({children:[FI('ISSN: 2822-4841',{color:'C9C0F0',size:18})],alignment:AlignmentType.RIGHT,spacing:{line:276,lineRule:'auto'}})]})
+        ]})]})
+      ]
+    }]
+  });
+
+  return await Packer.toBlob(doc);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Send emails
+// ═══════════════════════════════════════════════════════════════
+async function sendEmails(data,authors){
+  let authTxt='';
+  authors.forEach(a=>{authTxt+='\n--- Author '+a.n+(a.n===1?' (Corresponding)':'')+' ---\nName: '+a.name+'\nTitle: '+a.title+'\nDept: '+a.dept+'\nInstitution: '+a.univ+'\nEmail: '+a.email+'\nORCID: '+a.orcid+'\nCRediT: '+(a.credits.join(', ')||'—')+'\n';});
+
+  const body='PedPer Title Page Submission\n==================================\nTitle: '+data.msTitle+'\nRunning Head: '+data.msRunning+'\nType: '+data.msType+'\nWord Count: '+data.msWords+'\nKeywords: '+data.msKeywords+'\nDate: '+data.subDate+'\n'+authTxt;
+
+  // To editor
+  await fetch('https://api.web3forms.com/submit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+    access_key:'50b20f12-c947-406a-9d87-96ca8d298262',
+    subject:'[PedPer Title Page] '+data.msTitle.substring(0,60),
+    from_name:'PedPer Title Page Form',
+    email:'editor@pedagogicalperspective.com',
+    replyto:authors[0]?.email||'',
+    message:body
+  })});
+
+  // To author
+  if(authors[0]?.email){
+    await fetch('https://api.web3forms.com/submit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      access_key:'50b20f12-c947-406a-9d87-96ca8d298262',
+      subject:'PedPer — Your Title Page Has Been Submitted',
+      from_name:'Pedagogical Perspective',
+      email:authors[0].email,
+      replyto:'editor@pedagogicalperspective.com',
+      message:'Dear '+authors[0].name+',\n\nYour Title Page for "'+data.msTitle+'" has been submitted and downloaded.\n\nNEXT STEPS:\n1. Upload the downloaded Title Page (.docx) to OJS together with your manuscript files.\n2. OJS: https://pedagogicalperspective.com/index.php/pub/submissions\n\nFor enquiries: editor@pedagogicalperspective.com\n\nKind regards,\nPedagogical Perspective Editorial Office'
+    })});
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Submit
+// ═══════════════════════════════════════════════════════════════
+document.getElementById('tp-form').addEventListener('submit',async function(e){
+  e.preventDefault();
+  document.getElementById('form-err-banner').classList.remove('show');
+  if(!validate()){
+    document.getElementById('form-err-banner').classList.add('show');
+    document.querySelector('.err-msg.show')?.scrollIntoView({behavior:'smooth',block:'center'});
+    return;
+  }
+
+  ['step1','step2','step3','step4','step5'].forEach(id=>document.getElementById(id).className='step done');
+
+  const authors=collectAuthors();
+  const aiEl=document.querySelector('input[name="ai-disclosure"]:checked');
+  const data={
+    msTitle:g('ms-title'),msRunning:g('ms-running'),msType:g('ms-type'),msWords:g('ms-words'),
+    msTables:g('ms-tables'),msFigures:g('ms-figures'),msVersion:g('ms-version'),
+    msKeywords:g('ms-keywords'),subDate:g('sub-date'),
+    ethName:g('eth-name'),ethDate:g('eth-date'),ethNumber:g('eth-number'),ethConsent:g('eth-consent'),
+    declCoi:g('decl-coi'),declFunding:g('decl-funding'),declData:g('decl-data'),
+    declContrib:g('decl-contrib'),declAck:g('decl-ack'),declPrior:g('decl-prior'),
+    aiDisclosure:aiEl?.value||'—',aiDetails:g('ai-details'),
+  };
+
+  const btn=document.getElementById('submit-btn'),label=document.getElementById('submit-label'),spinner=document.getElementById('submit-spinner');
+  btn.disabled=true;spinner.style.display='block';
+  label.textContent='Generating document…';setProgress(20);
+
+  try{
+    const blob=await buildDocx(data,authors);setProgress(60);
+    const safe=(data.msRunning||'TitlePage').replace(/[^a-zA-Z0-9\-]/g,'_');
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=url;a.download='PedPer_TitlePage_'+safe+'.docx';
+    document.body.appendChild(a);a.click();
+    setTimeout(()=>{URL.revokeObjectURL(url);document.body.removeChild(a);},2000);
+    setProgress(75);
+
+    label.textContent='Sending email…';
+    await sendEmails(data,authors);setProgress(100);
+
+    setTimeout(()=>{
+      document.getElementById('tp-form').style.display='none';
+      const ss=document.getElementById('success-screen');
+      ss.style.display='block';
+      document.getElementById('success-email').textContent=authors[0]?.email||'';
+      ss.scrollIntoView({behavior:'smooth',block:'start'});
+    },400);
+  }catch(err){
+    console.error(err);btn.disabled=false;spinner.style.display='none';
+    label.textContent='⬇ Download Title Page & Send Email';
+    document.getElementById('progress-wrap').style.display='none';
+    alert('Error: '+err.message);
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════
+// Reset
+// ═══════════════════════════════════════════════════════════════
+function resetForm(){
+  document.getElementById('tp-form').reset();
+  document.getElementById('tp-form').style.display='block';
+  document.getElementById('success-screen').style.display='none';
+  document.getElementById('progress-wrap').style.display='none';
+  document.getElementById('submit-btn').disabled=false;
+  document.getElementById('submit-label').textContent='⬇ Download Title Page & Send Email';
+  document.getElementById('submit-spinner').style.display='none';
+  ['step1','step2','step3','step4','step5'].forEach(id=>document.getElementById(id).className='step');
+  document.getElementById('step1').className='step active';
+  document.querySelectorAll('.radio-item').forEach(r=>r.classList.remove('selected'));
+  document.getElementById('ai-detail-wrap').style.display='none';
+  aCtn.innerHTML='';authorCount=0;addAuthor();
+  const d=new Date();document.getElementById('sub-date').value=String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// Init
+addAuthor();
+document.getElementById('btn-add-author').addEventListener('click',addAuthor);
+</script>
+</body>
+</html>
